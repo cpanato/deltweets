@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -42,6 +43,8 @@ func main() {
 		os.Exit(2)
 	}
 
+	tweetsToIgnore := strings.Split(os.Getenv("TWEETS_IGNORE"), ",")
+
 	config := oauth1.NewConfig(apiKey, apiSecret)
 	token := oauth1.NewToken(accessToken, accessTokenSecret)
 
@@ -58,11 +61,24 @@ func main() {
 		Until: timeToDelete,
 		Count: 500,
 	}
+
 	search, _, _ := client.Search.Tweets(searchTweetParams)
-	fmt.Printf("TWEETS:\n%+v\n", len(search.Statuses))
+	fmt.Printf("TOTAL TWEETS:\n%+v\n", len(search.Statuses))
 
 	for _, status := range search.Statuses {
-		fmt.Printf("Will delete: %+v - %+v", status.ID, status)
+		flag := false
+		for _, tweet := range tweetsToIgnore {
+			if status.IDStr == tweet {
+				fmt.Printf("tweet is in the whitelist - %v\n", status.ID)
+				flag = true
+				break
+			}
+		}
+		if flag {
+			continue
+		}
+		fmt.Printf("%v\n", status.ID)
+		fmt.Printf("Will delete: %+v - %+v\n", status.ID, status)
 		// status destroy
 		params := &twitter.StatusDestroyParams{TrimUser: twitter.Bool(false)}
 		tweet, resp, err := client.Statuses.Destroy(status.ID, params)
@@ -70,6 +86,9 @@ func main() {
 		fmt.Printf("RESP:\n%+v\n", resp)
 		fmt.Printf("Err:\n%+v\n", err)
 	}
+
+	search, _, _ = client.Search.Tweets(searchTweetParams)
+	fmt.Printf("TOTAL TWEETS AFTER DELETION:\n%+v\n", len(search.Statuses))
 
 	os.Exit(0)
 }

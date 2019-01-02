@@ -1,6 +1,6 @@
 FROM iron/base
 LABEL maintainer "carlos.panato <ctadeu@gmail.com>"
-LABEL version="0.1"
+LABEL version="0.2"
 
 WORKDIR /app
 

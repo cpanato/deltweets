@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
           - name: deltweets
-            image: "ctadeu/deltweets:0.1"
+            image: "ctadeu/deltweets:0.2"
             imagePullPolicy: Always
             env:
             - name: TWITTER_API_KEY
@@ -41,4 +41,9 @@ spec:
                 secretKeyRef:
                   name: twittersecrets
                   key: TWITTER_USERNAME
+            - name: TWEETS_IGNORE
+              valueFrom:
+                secretKeyRef:
+                  name: twittersecrets
+                  key: TWEETS_IGNORE
           restartPolicy: Never
